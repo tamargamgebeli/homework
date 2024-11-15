@@ -1,0 +1,49 @@
+def generate_instructions(hats):
+    n = len(hats)  # განვსაზღვროთ სიის სიგრძე, ანუ რამდენი ფანი გვეზღუდება
+    segments = []  # ჩამოვაყალიბებთ ცარიელ სიას, სადაც შევინახავთ ჯგუფებს
+    start = None  # "start" ინიციალიზაცია. აქ შევინახავთ ჯგუფის დაწყების პოზიციას
+
+    # გავდივართ თითოეულ ფანზე, თუ ქუდი ატარებს, მისი მდგომარეობის მიხედვით
+    for i in range(n):
+        if hats[i] == '':  # თუ ფანი არ ატარებს ქუდს (empty string - '')
+            if start is not None:  # თუ ჯგუფი დაწყებულია
+                segments.append((start, i - 1, hats[start]))  # დავამატოთ ჯგუფი, დაწყება - "start", დასრულება - "i - 1", მიმართულება
+                start = None  # reset-გადავსებით, რათა შემდეგი ჯგუფი დაინიშნოს
+        elif start is None or hats[i] != hats[start]:  # თუ ახალი ჯგუფი იწყება (ქუდი შეიცვალა)
+            if start is not None:  # თუ წინადან ჯგუფი უკვე დაწყებულია
+                segments.append((start, i - 1, hats[start]))  # დავამატოთ წინა ჯგუფი
+            start = i  # ახალი ჯგუფის დაწყება "start" დღევანდელ ფანზე
+
+    # ბოლო ჯგუფის დამატება, თუ ის დარჩა (რადგან ბოლო ფანი შეიძლება იყოს ჯგუფის ნაწილი)
+    if start is not None:
+        segments.append((start, n - 1, hats[start]))  # ვამატებთ ბოლო ჯგუფს
+
+    #  წყვეტთ თითოეულ ჯგუფს თავისი მიმართულებით: Forward (F) თუ Backward (B)
+    forward_flips = []  # სიამ, სადაც იქნება "forward" (წინიდან) მიმართვები
+    backward_flips = []  # სიამ, სადაც იქნება "backward" (უკუღმა) მიმართვები
+
+    # თითოეული ჯგუფისთვის შედგენილია შესაბამისი ინსტრუქცია
+    for start, end, direction in segments:
+        if direction == 'F':  # თუ ჯგუფი ატარებს ქუდს წინიდან
+            if start == end:  # თუ ჯგუფში მხოლოდ ერთი ფანია
+                forward_flips.append(f"ფანებს პოზიციიდან {start + 1}-მდე გთხოვთ შეაბრუნოთ თქვენი კეპი")  # სვიმბოლური ფორმატირება
+            else:  # თუ ჯგუფში რამდენიმე ფანია
+                forward_flips.append(f"ფანებს პოზიციებიდან {start + 1} - {end + 1}-მდე გთხოვთ შეაბრუნოთ თქვენი კეპი")
+        elif direction == 'B':  # თუ ჯგუფი ატარებს ქუდს უკუღმა
+            if start == end:  # თუ ჯგუფში მხოლოდ ერთი ფანია
+                backward_flips.append(f"ფანებს პოზიციიდან {start + 1}-მდე გთხოვთ შეაბრუნოთ თქვენი კეპი")
+            else:  # თუ ჯგუფში რამდენიმე ფანია
+                backward_flips.append(f"ფანებს პოზიციებიდან {start + 1} - {end + 1}-მდე გთხოვთ შეაბრუნოთ თქვენი კეპი")
+
+    # მინიმალური ინსტრუქციების დაბრუნება: თუ forward_flips ნაკლებია backward_flips-ზე, დავაბრუნებთ მათ
+    if len(forward_flips) <= len(backward_flips):
+        return forward_flips  # თუ forward-flips ნაკლებია, დავაბრუნებთ მათ
+    else:
+        return backward_flips  # თუ backward-flips ნაკლებია, დავაბრუნებთ მათ
+
+# მაგალითი
+hats = ['F', 'F', 'B', 'B', 'B', 'F', 'B', 'B', 'B', 'F', 'F', '', 'B']  # ქუდის მდგომარეობა
+
+instructions = generate_instructions(hats)  # ინსტრუქციების გენერაცია
+for instruction in instructions:  # დავტესტოთ გენერირებული ინსტრუქციები
+    print(instruction)  # გამოსტაცეთ თითოეული ინსტრუქცია
